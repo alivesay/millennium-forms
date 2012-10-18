@@ -1,0 +1,13 @@
+name = Millennium Forms
+description = Provides Millennium WebPAC forms.
+core = 7.x
+
+package = Millennium ILS
+
+files[] = millennium_forms.module
+files[] = forms/millennium_forms_change_pin.inc
+files[] = forms/millennium_forms_contact_info.inc
+files[] = forms/millennium_forms_registration.inc
+files[] = forms/millennium_forms_acquire.inc
+files[] = forms/millennium_forms_pin_reset.inc
+files[] = user.js

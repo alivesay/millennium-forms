@@ -1,0 +1,260 @@
+<?php
+
+/**
+ * Implements hook_init()
+ */
+function millennium_forms_init() {
+  module_load_include('inc', 'millennium_forms', 'millennium_forms.api');
+  
+  $forms = array(
+    'millennium_forms_change_pin',
+    'millennium_forms_contact_info',
+    'millennium_forms_registration',
+    'millennium_forms_acquire',
+    'millennium_forms_pin_reset'
+  );
+  
+  foreach($forms as $form) {
+    module_load_include('inc', 'millennium_forms', 'forms/' . $form);
+  }
+}
+
+
+/**
+ * Implements hook_block_info()
+ */
+function millennium_forms_block_info() {
+  $blocks['change_pin'] = array(
+    'info'   => t('Block: Change PIN'),
+    'cache'  => DRUPAL_NO_CACHE
+  );
+
+ $blocks['contact_info'] = array(
+    'info'   => t('Block: Update Contact Information'),
+    'cache'  => DRUPAL_NO_CACHE
+  );
+
+ $blocks['registration'] = array(
+    'info'   => t('Block: Get a Library Card'),
+    'cache'  => DRUPAL_NO_CACHE
+  );
+
+ $blocks['acquire'] = array(
+    'info'   => t('Block: Suggest a Title for Purchase'),
+    'cache'  => DRUPAL_NO_CACHE
+  );
+
+ $blocks['pin_reset'] = array(
+    'info'   => t('Block: PIN Reset'),
+    'cache'  => DRUPAL_NO_CACHE
+  );
+
+
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view()
+ */
+function millennium_forms_block_view($delta='') {
+  switch($delta) {
+    case 'change_pin':
+      $block['subject'] = null;
+      $block['content'] = drupal_get_form('millennium_forms_change_pin_form');
+      break;
+    case 'contact_info':
+      $block['subject'] = null;
+      $block['content'] = drupal_get_form('millennium_forms_contact_info_form');
+      break;
+    case 'registration':
+      $block['subject'] = null;
+      $block['content'] = drupal_get_form('millennium_forms_registration_form');
+      break;
+    case 'acquire':
+      $block['subject'] = null;
+      $block['content'] = drupal_get_form('millennium_forms_acquire_form');
+      break;
+    case 'pin_reset':
+      $block['subject'] = null;
+      $block['content'] = drupal_get_form('millennium_forms_pin_reset_form');
+      break;
+  }
+
+  return $block;
+}
+
+
+/**
+ * Implements hook_help()
+ */
+function millennium_forms_help($section) {
+  switch( $section) {
+    case 'admin/modules#description':
+      return t('Provides Drupal integration with Millennium WebPAC forms.');
+  }
+}
+
+
+/**
+ * Implements hook_menu()
+ */
+function millennium_forms_menu() {
+  $items = array();
+
+  $items['admin/config/content/millennium_forms'] = array(
+    'title'            => t('Millennium Forms'),
+    'description'      => t('Configuration for Millennium Forms module'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('millennium_forms_admin_form'),
+    'access arguments' => array('access administration pages'),
+    'type'             => MENU_NORMAL_ITEM
+  );
+
+  return $items;
+}
+
+
+/**
+ * Page callback: Millennium Forms module settings
+ */
+function millennium_forms_admin_form($form, &$form_state) {
+  $form['webpac_api_url'] = array(
+    '#type'           => 'textfield',
+    '#title'          => t('Millennium WebPAC API URL'),
+    '#default_value'  => variable_get('millennium_forms_webpac_api_url',
+                                      'http://localhost'),
+    '#size'           => 256,
+    '#maxlength'      => 1024,
+    '#description'    => t('The URL to the WebPAC API.'),
+    '#required'       => TRUE
+  );
+
+ $form['register_disclaimer'] = array(
+    '#type'           => 'textarea',
+    '#title'          => t('Card Registration Disclaimer'),
+    '#default_value'  => variable_get('millennium_forms_register_disclaimer',
+                                      'No disclaimer set.'),
+    '#cols'           => 60,
+    '#rows'           => 15,
+    '#maxlength'      => 4096,
+    '#description'    => t('Markup displayed on the card registration form.'),
+    '#required'       => TRUE
+  );
+
+  $form['register_submitted'] = array(
+    '#type'           => 'textarea',
+    '#title'          => t('Card Registration Submitted Notice'),
+    '#default_value'  => variable_get('millennium_forms_register_submitted',
+                                      'Your card registration has been submitted.'),
+    '#cols'           => 60,
+    '#rows'           => 15,
+    '#maxlength'      => 4096,
+    '#description'    => t('Markup displayed after card registration form is submitted.'),
+    '#required'       => TRUE
+  );
+
+  $form['acquire_submitted'] = array(
+    '#type'           => 'textarea',
+    '#title'          => t('Suggest a Purchase Submitted Notice'),
+    '#default_value'  => variable_get('millennium_forms_acquire_submitted',
+                                      'Your suggestion for purchase has been submitted.'),
+    '#cols'           => 60,
+    '#rows'           => 15,
+    '#maxlength'      => 4096,
+    '#description'    => t('Markup displayed after purchase suggestion form is submitted.'),
+    '#required'       => TRUE
+  );
+
+  $form['pin_reset_notice'] = array(
+    '#type'           => 'textarea',
+    '#title'          => t('PIN Reset Notice'),
+    '#default_value'  => variable_get('millennium_forms_pin_reset_notice',
+                                      'If you cannot reset your PIN online, '
+                                      . 'please visit a local branch for assistance.'),
+    '#cols'           => 60,
+    '#rows'           => 10,
+    '#maxlength'      => 1024,
+    '#description'    => t('Markup displayed on the PIN Reset form.'),
+    '#required'       => TRUE
+  );
+
+  $form['pin_reset_submitted'] = array(
+    '#type'           => 'textarea',
+    '#title'          => t('PIN Reset Submited Notice'),
+    '#default_value'  => variable_get('millennium_forms_pin_reset_submitted',
+                                      'Your PIN reset request has been submitted.'),
+    '#cols'           => 60,
+    '#rows'           => 10,
+    '#maxlength'      => 1024,
+    '#description'    => t('Markup displayed after a PIN reset is submitted.'),
+    '#required'       => TRUE
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit')
+  );
+
+  return $form;
+}
+
+
+/**
+ * Page callback: Millennium Forms module settings submit
+ */
+function millennium_forms_admin_form_submit($form, &$form_state) {
+  variable_set('millennium_forms_webpac_api_url',
+               $form_state['input']['webpac_api_url']);
+  variable_set('millennium_forms_register_disclaimer',
+               $form_state['input']['register_disclaimer']);
+  variable_set('millennium_forms_register_submitted',
+               $form_state['input']['register_submitted']);
+  variable_set('millennium_forms_acquire_submitted',
+               $form_state['input']['acquire_submitted']);
+  variable_set('millennium_forms_pin_reset_notice',
+               $form_state['input']['pin_reset_notice']);
+  variable_set('millennium_forms_pin_reset_submitted',
+               $form_state['input']['pin_reset_submitted']);
+}
+
+
+/**
+ * Implements hook_mollom_form_list()
+ */
+function millennium_forms_mollom_form_list() {
+  $forms['millennium_forms_registration_form'] = array(
+    'title' => t('Library card registration form')
+  );
+
+  return $forms;
+}
+
+
+/**
+ * Implements hook_mollom_form()
+ */
+function millennium_forms_mollom_form_info($form_id) {
+  switch($form_id) {
+    case 'millennium_forms_registration_form':
+      return array(
+        'mode'     => MOLLOM_MODE_ANALYSIS,
+        'elements' => array(
+          'first_name'      => t('First name'),
+          'middle_name'     => t('Middle name'),
+          'last_name'       => t('Last name'),
+          'mailing_address' => t('Mailing address'),
+          'mailing_city'    => t('Mailing city'),
+          'mailing_state'   => t('Mailing state'),
+          'mailing_zipcode' => t('Mailing ZIP code'),
+          'street_address'  => t('Street address'),
+          'street_city'     => t('Street city'),
+          'street_state'    => t('Street state'),
+          'street_zipcode'  => t('Street ZIP code'),
+          'email'           => t('Email'),
+          'telephone'       => t('Telephone')
+        )
+      );
+      break;
+  }
+}
