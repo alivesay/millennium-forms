@@ -1,7 +1,7 @@
 millennium-forms
 ================
 
-Provides Drupal interation with Millennium ILS web forms.
+Provides Drupal integration with Millennium ILS web forms.
 
 Requires a running instance of the <a href="https://github.com/alivesay/webpac-tools">webpac-tools</a> REST interface.
 
